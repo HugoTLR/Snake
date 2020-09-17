@@ -27,9 +27,20 @@ class Display:
       cv.imshow(f"Stack {i}",np.hstack(stack))
     return cv.waitKey(self.delay) == ord('q') & 0xFF
 
-  def draw(self,board):
+  def draw(self,board,info = True):
     im = np.zeros((self.H,self.W,3),dtype=np.uint8)
     for j,row in enumerate(board.board):
       for i,col in enumerate(row):
         im[j][i] = Display.colors[Display.mapping[col]]
-    return cv.resize(im,(0,0),fx=self.SCALE,fy=self.SCALE,interpolation=cv.INTER_AREA)
+    im = cv.resize(im,(0,0),fx=self.SCALE,fy=self.SCALE,interpolation=cv.INTER_AREA)
+    if info:
+      im = self.draw_info(board,im)
+    return im
+
+  def draw_info(self,board,im):
+    font = cv.FONT_HERSHEY_SIMPLEX
+    size = .5
+    scale = 1
+    text = f"Timeleft: {board.snake.timeleft}  Livetime: {board.snake.livetime}"
+    cv.putText(im,text,(5,15),font,size,Display.colors['WHITE'],scale,cv.LINE_AA)
+    return im

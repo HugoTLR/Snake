@@ -1,6 +1,7 @@
 import sys
 import math
 import random
+from NN import Model
 
 class Board:
   cell = {  0 : {"typ":"EMPTY","rpr":' '}, \
@@ -9,6 +10,15 @@ class Board:
             3 : {"typ":"HEAD","rpr":'*'}, \
             4 : {"typ":"FOOD","rpr":'o'}, \
             5 : {"typ":"DEAD","rpr":'W'}}
+
+  dir_vect = {0:  (0,-1)  , 
+              1:  (-1,0)  ,
+              2:  (0,1)   ,
+              3:  (1,0)   ,
+              4:  (-1,-1) ,
+              5:  (-1,1)  ,
+              6:  (1,1)   ,
+              7:  (1,-1)}
 
   def __str__(self):
     ret = ""
@@ -61,6 +71,8 @@ class Snake:
 
     self.livetime = 0 #How many step we've done
 
+    self.brain = Model.build(8,3,1,4) #8*3*1 vec and 4 output
+
 
 
   def init_body(self):
@@ -97,3 +109,43 @@ class Snake:
   def change_direction(self,direction):
     self.direction = direction
 
+
+  def look(self,direction):
+    vision = [0,0,0]
+    head = self.body[0]
+
+    position = [i for i in head]
+    food = False
+    body = False
+    dist = 0
+
+    #Move once
+    position[0] += Board.dir_vect[direction][0]
+    position[1] += Board.dir_vect[direction][1]
+    dist += 1
+
+    while not self.parent.is_border(position[0],position[1]):
+
+      if not food and position == self.parent.food:
+        vision[0] = 1
+        food = True
+
+      if not body and tuple(position) in self.body:
+        vision[1] = 1 / dist
+        body = True
+
+      position[0] += Board.dir_vect[direction][0]
+      position[1] += Board.dir_vect[direction][1]
+      dist += 1
+    vision[2] = 1 / dist
+    return vision
+
+  def vision(self):
+    vision = []
+    for direction in Board.dir_vect.keys():
+      vision.extend(self.look(direction))
+    return vision
+
+
+  def update_score(self):
+    self.score = self.livetime
