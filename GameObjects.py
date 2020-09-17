@@ -94,6 +94,6 @@ class Snake:
       self.dead_cell = n_head
       self.timeleft = 0
 
-  def change_dir(self,direction):
+  def change_direction(self,direction):
     self.direction = direction
 
